@@ -28,8 +28,8 @@ export default {
   data () {
     return {
       links: [
-        { icon: 'account_box', text: 'Me', route: '/' },
-        { icon: 'healing', text: 'Devices', route: '/device' }
+        { icon: 'account_box', text: 'Me', route: '/practitioner' },
+        { icon: 'healing', text: 'Devices', route: '/' }
       ]
     }
   }
