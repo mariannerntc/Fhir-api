@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
   // data () {
   //   return {
@@ -52,13 +52,11 @@ export default {
   computed: {
     ...mapGetters([
       'practitioner',
-      'practitionerId',
-      'deviceListId'
+      'practitionerId'
     ])
   },
-  async created() {
+  async created () {
     await this.$store.dispatch('getPractitioner', this.practitionerId)
-    await this.$store.dispatch('getDeviceIdsList', this.deviceListId)
   }
 }
 </script>

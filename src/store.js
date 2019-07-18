@@ -9,8 +9,15 @@ export default new Vuex.Store({
     practitioner: { fullName : '', birthDate : '' },
     practitionerId: 1984415,
     deviceListId: 1986152,
-    deviceIdsList: [],
-    devices: []
+    devicesIdList: [],
+    devices: [],
+    deviceTypes: [
+      {'value' : 'balance', 'text' : 'Balance'},
+      {'value' : 'blood monitor', 'text' : 'Blood pressure monitor'},
+      {'value' : 'thermometer', 'text' : 'Thermometer'},
+      {'value' : 'ecg', 'text' : 'Electrocardiogram'},
+      {'value' : 'ultrasound', 'text' : 'ultrasound'},
+    ]
   },
   getters: {
     allDevices (state) {
@@ -24,14 +31,17 @@ export default new Vuex.Store({
     },
     deviceListId (state) {
       return state.deviceListId;
+    },
+    allDeviceTypes (state) {
+      return state.deviceTypes
     }
   },
   mutations: {
     setPractitioner (state, practitioner) {
       state.practitioner = practitioner
     },
-    setDeviceIdsList (state, deviceIdsList) {
-      state.deviceIdsList = deviceIdsList
+    setDevicesIdList (state, devicesIdList) {
+      state.devicesIdList = devicesIdList
     }
   },
   actions: {
@@ -46,17 +56,17 @@ export default new Vuex.Store({
       }
       commit('setPractitioner', practitioner)
     },
-    async getDeviceIdsList ({commit}, deviceListId) {
+    async getDevicesIdList ({commit}, deviceListId) {
       let response = await fhirApi({
         method: 'get',
         url: 'List/' + deviceListId
       })
-      let deviceIdsList = [];
+      let devicesIdList = [];
       response.data.entry.forEach(e => {
-        deviceIdsList.push(e.item.reference);
+        devicesIdList.push(e.item.reference);
       });
-      console.log(deviceIdsList);
-      commit('setDeviceIdsList', deviceIdsList)
+      console.log(devicesIdList);
+      commit('setDevicesIdList', devicesIdList)
     }
   }
 })
