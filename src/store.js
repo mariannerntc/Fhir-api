@@ -8,15 +8,16 @@ export default new Vuex.Store({
   state: {
     practitioner: { fullName : '', birthDate : '' },
     practitionerId: 1984415,
-    deviceListId: 1986152,
+    deviceListId: 1989586,
     devicesIdList: [],
+    devicesEntryList: [],
     devices: [],
     deviceTypes: [
       {'value' : 'balance', 'text' : 'Balance'},
-      {'value' : 'blood monitor', 'text' : 'Blood pressure monitor'},
+      {'value' : 'blood pressure monitor', 'text' : 'Blood pressure monitor'},
       {'value' : 'thermometer', 'text' : 'Thermometer'},
       {'value' : 'ecg', 'text' : 'Electrocardiogram'},
-      {'value' : 'ultrasound', 'text' : 'ultrasound'},
+      {'value' : 'ultrasound', 'text' : 'Ultrasound'},
     ]
   },
   getters: {
@@ -34,6 +35,9 @@ export default new Vuex.Store({
     },
     allDeviceTypes (state) {
       return state.deviceTypes
+    },
+    devicesEntryList (state) {
+      return state.devicesEntryList
     }
   },
   mutations: {
@@ -42,6 +46,12 @@ export default new Vuex.Store({
     },
     setDevicesIdList (state, devicesIdList) {
       state.devicesIdList = devicesIdList
+    },
+    setDevicesEntryList(state, devicesEntryList) {
+      state.devicesEntryList = devicesEntryList
+    },
+    addNewDeviceToList(state, newDevice) {
+      state.devices.push(newDevice)
     }
   },
   actions: {
@@ -62,11 +72,61 @@ export default new Vuex.Store({
         url: 'List/' + deviceListId
       })
       let devicesIdList = [];
+      let devicesEntryList = [];
       response.data.entry.forEach(e => {
-        devicesIdList.push(e.item.reference);
+        devicesIdList.push(e.item.reference.split('/')[1]);
+        devicesEntryList.push(e.item)
       });
-      console.log(devicesIdList);
-      commit('setDevicesIdList', devicesIdList)
+      commit('setDevicesIdList', devicesIdList),
+      commit('setDevicesEntryList', devicesEntryList)
+    },
+    async addDevice ({commit, dispatch}, {status, deviceType, display, expirationDate, version}) {
+      const toSend = {
+        resourceType : 'Device',
+        status : status ? 'active' : 'inactive',
+        type: {
+          coding : [{
+            code: deviceType,
+            display: display
+          }]
+        },
+        expirationDate: expirationDate,
+        version: version
+      };
+      let response = await fhirApi({
+        method: 'post',
+        url: '/Device',
+        headers: {'Content-Type' : 'application/fhir+json'},
+        data: toSend 
+      });
+      const newDeviceId = response.data.id;
+      await dispatch('updateList', newDeviceId);
+      commit('addNewDeviceToList', toSend);
+    },
+    async updateList({getters}, newDeviceId) {
+      let deviceListId = getters.deviceListId;
+      let devicesEntryList = getters.devicesEntryList
+      devicesEntryList.push({
+        date: new Date().toISOString().substr(0, 10),
+        item: {
+          reference: 'Device/' + newDeviceId
+        }
+      });
+      const newList = {
+        resourceType: 'List',
+        id: deviceListId,
+        status: 'current',
+        title: "Practitioner's devices",
+        source: 'Practitioner/1984415',
+        entry: devicesEntryList
+      };
+      let response = await fhirApi({
+        method: 'put',
+        url: '/Device/' + newDeviceId,
+        headers: {'Content-Type' : 'application/fhir+json'},
+        data: newList 
+      });
+      console.log(response.data);
     }
   }
 })
