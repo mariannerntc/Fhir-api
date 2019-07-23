@@ -1,43 +1,50 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {fhirApi} from '@/api'
+import { fhirApi } from '@/api'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    practitioner: { fullName : '', birthDate : '' },
+    practitioner: { fullName: '', birthDate: '' },
     practitionerId: 1984415,
     deviceListId: 1989586,
     devicesIdList: [],
     devicesEntryList: [],
+    // devices: [{resourceType : '', status : '',type: { coding : [{ code: '', display: ''}]}, expirationDate: '', version: ''}],4
     devices: [],
     deviceTypes: [
-      {'value' : 'balance', 'text' : 'Balance'},
-      {'value' : 'blood pressure monitor', 'text' : 'Blood pressure monitor'},
-      {'value' : 'thermometer', 'text' : 'Thermometer'},
-      {'value' : 'ecg', 'text' : 'Electrocardiogram'},
-      {'value' : 'ultrasound', 'text' : 'Ultrasound'},
+      { 'value': 'balance', 'text': 'Balance' },
+      { 'value': 'blood pressure monitor', 'text': 'Blood pressure monitor' },
+      { 'value': 'thermometer', 'text': 'Thermometer' },
+      { 'value': 'ecg', 'text': 'Electrocardiogram' },
+      { 'value': 'ultrasound', 'text': 'Ultrasound' }
     ]
   },
   getters: {
     allDevices (state) {
-      return state.devices;
+      return state.devices
     },
     practitioner (state) {
-      return state.practitioner;
+      return state.practitioner
     },
     practitionerId (state) {
-      return state.practitionerId;
+      return state.practitionerId
     },
     deviceListId (state) {
-      return state.deviceListId;
+      return state.deviceListId
     },
     allDeviceTypes (state) {
       return state.deviceTypes
     },
     devicesEntryList (state) {
       return state.devicesEntryList
+    },
+    devicesIdList (state) {
+      return state.devicesIdList
+    },
+    devices (state) {
+      return state.devices
     }
   },
   mutations: {
@@ -47,18 +54,21 @@ export default new Vuex.Store({
     setDevicesIdList (state, devicesIdList) {
       state.devicesIdList = devicesIdList
     },
-    setDevicesEntryList(state, devicesEntryList) {
+    setDevicesEntryList (state, devicesEntryList) {
       state.devicesEntryList = devicesEntryList
     },
-    addNewDeviceToList(state, newDevice) {
+    setDevices (state, devices) {
+      state.devices = devices
+    },
+    addNewDeviceToList (state, newDevice) {
       state.devices.push(newDevice)
     }
   },
   actions: {
-    async getPractitioner ({commit}, practitionerId) {
+    async getPractitioner ({ commit }, practitionerId) {
       let response = await fhirApi({
         method: 'get',
-        url: '/Practitioner/' + practitionerId,
+        url: '/Practitioner/' + practitionerId
       })
       const practitioner = {
         fullName: response.data.name[0].text,
@@ -66,52 +76,63 @@ export default new Vuex.Store({
       }
       commit('setPractitioner', practitioner)
     },
-    async getDevicesIdList ({commit}, deviceListId) {
+    async getDevicesIdList ({ commit, getters }) {
+      const deviceListId = getters.deviceListId
       let response = await fhirApi({
         method: 'get',
         url: 'List/' + deviceListId
       })
-      let devicesIdList = [];
-      let devicesEntryList = [];
+      let devicesIdList = []
+      let devicesEntryList = []
       response.data.entry.forEach(e => {
-        devicesIdList.push(e.item.reference.split('/')[1]);
-        devicesEntryList.push(e.item)
-      });
-      commit('setDevicesIdList', devicesIdList),
+        devicesIdList.push(e.item.reference.split('/')[1])
+        devicesEntryList.push(e)
+      })
+      commit('setDevicesIdList', devicesIdList)
       commit('setDevicesEntryList', devicesEntryList)
     },
-    async addDevice ({commit, dispatch}, {status, deviceType, display, expirationDate, version}) {
+    async getDevices ({ commit, getters }) {
+      const devicesIdList = getters.devicesIdList
+      let devices = []
+      let response = null
+      for (let i = 0; i < devicesIdList.length; i++) {
+        response = await fhirApi.get('/Device/' + devicesIdList[i])
+        devices.push(response.data)
+      }
+      commit('setDevices', devices)
+    },
+    async addDevice ({ commit, dispatch }, { status, deviceType, display, expirationDate, version }) {
       const toSend = {
-        resourceType : 'Device',
-        status : status ? 'active' : 'inactive',
+        resourceType: 'Device',
+        status: status ? 'active' : 'inactive',
         type: {
-          coding : [{
+          coding: [{
             code: deviceType,
             display: display
           }]
         },
         expirationDate: expirationDate,
         version: version
-      };
+      }
       let response = await fhirApi({
         method: 'post',
         url: '/Device',
-        headers: {'Content-Type' : 'application/fhir+json'},
-        data: toSend 
-      });
-      const newDeviceId = response.data.id;
-      await dispatch('updateList', newDeviceId);
-      commit('addNewDeviceToList', toSend);
+        headers: { 'Content-Type': 'application/fhir+json' },
+        data: toSend
+      })
+      const newDeviceId = response.data.id
+      await dispatch('updateList', newDeviceId)
+      commit('addNewDeviceToList', toSend)
     },
-    async updateList({getters}, newDeviceId) {
-      let deviceListId = getters.deviceListId;
+    async updateList ({ getters }, newDeviceId) {
+      let deviceListId = getters.deviceListId
       let devicesEntryList = getters.devicesEntryList
       devicesEntryList.push({
         date: new Date().toISOString().substr(0, 10),
         item: {
           reference: 'Device/' + newDeviceId
         }
-      });
+      })
       const newList = {
         resourceType: 'List',
         id: deviceListId,
@@ -119,14 +140,13 @@ export default new Vuex.Store({
         title: "Practitioner's devices",
         source: 'Practitioner/1984415',
         entry: devicesEntryList
-      };
-      let response = await fhirApi({
+      }
+      await fhirApi({
         method: 'put',
-        url: '/Device/' + newDeviceId,
-        headers: {'Content-Type' : 'application/fhir+json'},
-        data: newList 
-      });
-      console.log(response.data);
+        url: '/List/' + deviceListId,
+        headers: { 'Content-Type': 'application/fhir+json' },
+        data: newList
+      })
     }
   }
 })
