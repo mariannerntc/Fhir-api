@@ -11,14 +11,13 @@ export default new Vuex.Store({
     deviceListId: 1989586,
     devicesIdList: [],
     devicesEntryList: [],
-    // devices: [{resourceType : '', status : '',type: { coding : [{ code: '', display: ''}]}, expirationDate: '', version: ''}],4
     devices: [],
     deviceTypes: [
-      { 'value': 'balance', 'text': 'Balance' },
-      { 'value': 'blood pressure monitor', 'text': 'Blood pressure monitor' },
-      { 'value': 'thermometer', 'text': 'Thermometer' },
-      { 'value': 'ecg', 'text': 'Electrocardiogram' },
-      { 'value': 'ultrasound', 'text': 'Ultrasound' }
+      { value: 'balance', text: 'Balance' },
+      { value: 'blood pressure monitor', text: 'Blood pressure monitor' },
+      { value: 'thermometer', text: 'Thermometer' },
+      { value: 'ecg', text: 'Electrocardiogram' },
+      { value: 'ultrasound', text: 'Ultrasound' }
     ]
   },
   getters: {
@@ -91,15 +90,15 @@ export default new Vuex.Store({
       commit('setDevicesIdList', devicesIdList)
       commit('setDevicesEntryList', devicesEntryList)
     },
-    async getDevices ({ commit, getters }) {
+    async getDevices ({ commit, getters, dispatch }) {
       const devicesIdList = getters.devicesIdList
-      let devices = []
-      let response = null
-      for (let i = 0; i < devicesIdList.length; i++) {
-        response = await fhirApi.get('/Device/' + devicesIdList[i])
-        devices.push(response.data)
-      }
-      commit('setDevices', devices)
+      let responseArray = await Promise.all(
+        devicesIdList.map(async deviceId => {
+          let url = '/Device/' + deviceId
+          return fhirApi.get(url)
+        })
+      )
+      commit('setDevices', responseArray.map(resp => resp.data))
     },
     async addDevice ({ commit, dispatch }, { status, deviceType, display, expirationDate, version }) {
       const toSend = {
@@ -121,10 +120,10 @@ export default new Vuex.Store({
         data: toSend
       })
       const newDeviceId = response.data.id
-      await dispatch('updateList', newDeviceId)
+      await dispatch('addDevicetoList', newDeviceId)
       commit('addNewDeviceToList', toSend)
     },
-    async updateList ({ getters }, newDeviceId) {
+    async addDevicetoList ({ getters, commit }, newDeviceId) {
       let deviceListId = getters.deviceListId
       let devicesEntryList = getters.devicesEntryList
       devicesEntryList.push({
@@ -147,6 +146,57 @@ export default new Vuex.Store({
         headers: { 'Content-Type': 'application/fhir+json' },
         data: newList
       })
+      commit('setDevicesEntryList', devicesEntryList)
+    },
+    deleteDeviceToList ({ getters, commit }, deviceToDeleteId) {
+      let devicesEntryList = getters.devicesEntryList
+      const deviceListId = getters.deviceListId
+      const newDeviceList = devicesEntryList.filter(deviceEntry => deviceEntry.item.reference.split('/')[1] !== deviceToDeleteId)
+      const newList = {
+        resourceType: 'List',
+        id: deviceListId,
+        status: 'current',
+        title: "Practitioner's devices",
+        source: 'Practitioner/1984415',
+        entry: newDeviceList
+      }
+      fhirApi({
+        method: 'put',
+        url: '/List/' + deviceListId,
+        headers: { 'Content-Type': 'application/fhir+json' },
+        data: newList
+      })
+      commit('setDevicesEntryList', newDeviceList)
+    },
+    async deleteDevice ({ commit, getters }, deviceToDeleteId) {
+      let devices = getters.devices
+      let devicesIdList = getters.devicesIdList
+      this.dispatch('deleteDeviceToList', deviceToDeleteId)
+      await fhirApi.delete('Device/' + deviceToDeleteId)
+      commit('setDevices', devices.filter(device => device.id !== deviceToDeleteId))
+      commit('setDevicesIdList', devicesIdList.filter(deviceId => deviceId !== deviceToDeleteId))
+    },
+    async editDevice ({ commit }, display, code, version, expirationDate, status, id) {
+      const updatedDevice = {
+        resourceType: 'Device',
+        id: id,
+        status: status ? 'active' : 'inactive',
+        type: {
+          coding: [{
+            code: code,
+            display: display
+          }]
+        },
+        expirationDate: expirationDate,
+        version: version
+      }
+      let response = await fhirApi({
+        method: 'put',
+        url: '/Device/' + id,
+        headers: { 'Content-Type': 'application/fhir+json' },
+        data: toSend
+      })
+      commit('addNewDeviceToList', toSend)
     }
   }
 })

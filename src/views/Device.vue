@@ -27,7 +27,15 @@
       <v-divider></v-divider>
     </v-card>
 
-    <v-card flat v-for="device in devices" :key="device.id">
+    <DeviceDisplay v-for="device in devices" :key="device.id"
+    v-bind:display="device.type.coding[0].display"
+    v-bind:code="device.type.coding[0].code"
+    v-bind:version="device.version"
+    v-bind:expirationDate="device.expirationDate"
+    v-bind:status="device.status"
+    v-bind:id="device.id"/>
+
+    <!-- <v-card flat v-for="device in devices" :key="device.id">
       <v-layout row wrap class="pa-3 project ">
         <v-flex xs6 md2>
           <div>{{ device.type.coding[0].display }}</div>
@@ -41,9 +49,9 @@
         <v-flex xs6 sm4 md2>
           <div>{{ device.expirationDate }}</div>
         </v-flex>
-        <v-flex xs2 sm4 md2>
+        <v-flex xs6 sm4 md2>
           <div>
-            <v-chip small class="white--text my-2 caption">{{ device.status }}</v-chip>
+            <v-chip small class="white--text my-2 caption success">{{ device.status }}</v-chip>
           </div>
         </v-flex>
         <v-flex xs6 sm4 md2>
@@ -51,16 +59,17 @@
         </v-flex>
       </v-layout>
       <v-divider></v-divider>
-    </v-card>
+    </v-card> -->
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import Popupform from '../components/Popupform'
+import DeviceDisplay from '../components/DeviceDisplay'
 
 export default {
-  components: { Popupform },
+  components: { Popupform, DeviceDisplay },
   computed: {
     ...mapGetters([
       'devices'
