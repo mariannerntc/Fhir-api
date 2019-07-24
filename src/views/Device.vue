@@ -27,13 +27,13 @@
       <v-divider></v-divider>
     </v-card>
 
-    <DeviceDisplay v-for="device in devices" :key="device.id"
-    v-bind:display="device.type.coding[0].display"
-    v-bind:code="device.type.coding[0].code"
-    v-bind:version="device.version"
-    v-bind:expirationDate="device.expirationDate"
-    v-bind:status="device.status"
-    v-bind:id="device.id"/>
+    <DeviceDisplay v-for="deviceDisplay in devices" :key="deviceDisplay.id"
+    v-bind:display="deviceDisplay.type.coding[0].display"
+    v-bind:code="deviceDisplay.type.coding[0].code"
+    v-bind:version="deviceDisplay.version"
+    v-bind:expirationDate="deviceDisplay.expirationDate"
+    v-bind:status="deviceDisplay.status"
+    v-bind:id="deviceDisplay.id"/>
 
   </div>
 </template>

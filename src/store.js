@@ -65,7 +65,7 @@ export default new Vuex.Store({
   },
   actions: {
     deviceById ({ getters, dispatch }, id) {
-      return getters.devices.filter(device => device.id == id)[0]
+      return getters.devices.filter(device => device.id === id)[0]
     },
     async getPractitioner ({ commit }, practitionerId) {
       let response = await fhirApi({
@@ -179,30 +179,33 @@ export default new Vuex.Store({
       commit('setDevices', devices.filter(device => device.id !== deviceToDeleteId))
       commit('setDevicesIdList', devicesIdList.filter(deviceId => deviceId !== deviceToDeleteId))
     },
-    async editDevice ({ commit, getters }, display, code, version, expirationDate, status, id) {
-      let devicesEntryList = getters.devicesEntryList
-      const newDeviceList = devicesEntryList.filter(deviceEntry => deviceEntry.item.reference.split('/')[1] !== id)
+    async editDevice ({ getters }, device) {
+      // let devices = getters.devices
+      // const newDeviceList = devices.filter(d => d.id !== device.id)
       const updatedDevice = {
         resourceType: 'Device',
-        id: id,
-        status: status ? 'active' : 'inactive',
+        id: device.id,
+        status: device.active ? 'active' : 'inactive',
         type: {
           coding: [{
-            code: code,
-            display: display
+            code: device.code,
+            display: device.display
           }]
         },
-        expirationDate: expirationDate,
-        version: version
+        expirationDate: device.expirationDate,
+        version: device.version
       }
-      newDeviceList.push(updatedDevice)
       await fhirApi({
         method: 'put',
-        url: '/Device/' + id,
+        url: '/Device/' + device.id,
         headers: { 'Content-Type': 'application/fhir+json' },
         data: updatedDevice
       })
-      commit('setDevices', updatedDevice)
+      // Vue.set(devices, device.id, updatedDevice)
+      // console.log(devices)
+      // newDeviceList.push(updatedDevice)
+      // console.log(newDeviceList)
+      // commit('setDevices', updatedDevice)
     }
   }
 })

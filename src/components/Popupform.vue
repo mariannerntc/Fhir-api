@@ -80,7 +80,6 @@ export default {
         await this.$store.dispatch('addDevice', this.device)
         this.buttonLoading = false
         this.dialog = false
-        // this.$emit('projectAdded')
       }
     }
   },
