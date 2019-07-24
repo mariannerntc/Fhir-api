@@ -1,34 +1,24 @@
 # fhir-api
 
-## Project setup
+Welcome to the fhir API project. In order to run this app, you have to do some things first :
+
+## 1 Install dependencies
+Go in the project directory and run :
 ```
 npm install
 ```
+This will install all the dependecies that the app need.
 
-### Compiles and hot-reloads for development
+## 2 Compiles 
+After the 1 is complete, run :
 ```
 npm run serve
 ```
+This will launch the app. You can see it at : localhost:8080
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
+## 3 Run tests
+There is a few tests, to run them do :
 ```
 npm run test
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

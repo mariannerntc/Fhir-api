@@ -1,54 +1,57 @@
 <template>
   <div class="practitioner">
     <h1>My informations</h1>
-    <v-container class="my-5">
-      <v-avatar size="100">
-        <img src="/avatar-5.png">
+    <div>
+      <v-avatar size="300">
+        <img src="/avatar-5.png" margin-left="200%">
       </v-avatar>
+    </div>
+    
 
-      <v-card flat>
-        <v-layout>
-          <v-flex m4>
-            <div>Name</div>
-            <div>{{ practitioner.fullName }}</div>
-          </v-flex>
-          <v-flex m4>
-            <div>Birth Date</div>
-            <div>{{ practitioner.birthDate }}</div>
-          </v-flex>
-          <v-flex m4>
-            <div>Phone</div>
-            <div>{{ practitioner.birthDate }}</div>
-          </v-flex>
-          <v-flex m4>
-            <div>Birth Date</div>
-            <div>{{ practitioner.birthDate }}</div>
-          </v-flex>
-        </v-layout>
-      </v-card>
-    </v-container>
+    <v-card flat>
+      <v-layout row wrap class="pa-3">
+        <v-flex xs12 md2>
+          <div class="display-1">Name</div>
+        </v-flex>
+        <v-flex xs6 sm4 md2>
+          <div class="display-1">Birth Date</div>
+        </v-flex>
+          <v-flex xs6 sm4 md2>
+          <div class="display-1">Gender</div>
+        </v-flex>
+        <v-flex xs6 sm4 md4>
+          <div class="display-1">Address</div>
+        </v-flex>
+        <v-flex xs6 sm4 md2>
+          <div class="display-1">Phone</div>
+        </v-flex>
+      </v-layout>
+      <v-divider></v-divider>
+      <v-layout row wrap class="pa-3">
+        <v-flex md2>
+          <div>{{ practitioner.fullName }}</div>
+        </v-flex>
+        <v-flex md2>
+          <div>{{ practitioner.birthDate }}</div>
+        </v-flex>
+        <v-flex md2>
+          <div>{{ practitioner.gender }}</div>
+        </v-flex>
+        <v-flex md4>
+          <div>{{ practitioner.address }}</div>
+        </v-flex>
+        <v-flex md2>
+          <div>{{ practitioner.phone }}</div>
+        </v-flex>
+      </v-layout>
+      <v-divider></v-divider>
+    </v-card>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 export default {
-  // data () {
-  //   return {
-  //     practitioner: {fullName : '', birthDate : ''}
-  //   }
-  // },
-  // mounted () {
-  //   let practitioner = this.$resource('Practitioner/1984415')
-  //   practitioner.query()
-  //     .then((response) => {
-  //       this.practitioner.fullName = response.data.name[0].text
-  //       this.practitioner.birthDate = response.data.birthDate
-  //       console.log(response.data)
-  //     }, (response) => {
-  //       console.log('erreur', response)
-  //     })
-  // }
   computed: {
     ...mapGetters([
       'practitioner',

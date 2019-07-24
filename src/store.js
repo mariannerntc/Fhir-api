@@ -6,7 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    practitioner: { fullName: '', birthDate: '' },
+    practitioner: {},
     practitionerId: 1984415,
     deviceListId: 1989586,
     devicesIdList: [],
@@ -74,8 +74,12 @@ export default new Vuex.Store({
       })
       const practitioner = {
         fullName: response.data.name[0].text,
-        birhtDate: response.data.birthDate
+        birthDate: response.data.birthDate,
+        phone: response.data.telecom[0].value,
+        address: response.data.address[0].text,
+        gender: response.data.gender
       }
+      console.log(practitioner)
       commit('setPractitioner', practitioner)
     },
     async getDevicesIdList ({ commit, getters }) {
@@ -179,9 +183,7 @@ export default new Vuex.Store({
       commit('setDevices', devices.filter(device => device.id !== deviceToDeleteId))
       commit('setDevicesIdList', devicesIdList.filter(deviceId => deviceId !== deviceToDeleteId))
     },
-    async editDevice ({ getters }, device) {
-      // let devices = getters.devices
-      // const newDeviceList = devices.filter(d => d.id !== device.id)
+    async editDevice (device) {
       const updatedDevice = {
         resourceType: 'Device',
         id: device.id,
@@ -201,11 +203,6 @@ export default new Vuex.Store({
         headers: { 'Content-Type': 'application/fhir+json' },
         data: updatedDevice
       })
-      // Vue.set(devices, device.id, updatedDevice)
-      // console.log(devices)
-      // newDeviceList.push(updatedDevice)
-      // console.log(newDeviceList)
-      // commit('setDevices', updatedDevice)
     }
   }
 })

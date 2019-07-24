@@ -18,7 +18,7 @@
           <div>Expiration date</div>
         </v-flex>
         <v-flex xs6 sm4 md2>
-          <div>Satus</div>
+          <div>Status</div>
         </v-flex>
         <v-flex xs6 sm4 md2>
           <div>Actions</div>
