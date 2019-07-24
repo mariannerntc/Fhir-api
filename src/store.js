@@ -64,6 +64,9 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    deviceById ({ getters, dispatch }, id) {
+      return getters.devices.filter(device => device.id == id)[0]
+    },
     async getPractitioner ({ commit }, practitionerId) {
       let response = await fhirApi({
         method: 'get',
@@ -90,7 +93,7 @@ export default new Vuex.Store({
       commit('setDevicesIdList', devicesIdList)
       commit('setDevicesEntryList', devicesEntryList)
     },
-    async getDevices ({ commit, getters, dispatch }) {
+    async getDevices ({ commit, getters }) {
       const devicesIdList = getters.devicesIdList
       let responseArray = await Promise.all(
         devicesIdList.map(async deviceId => {
@@ -148,7 +151,7 @@ export default new Vuex.Store({
       })
       commit('setDevicesEntryList', devicesEntryList)
     },
-    deleteDeviceToList ({ getters, commit }, deviceToDeleteId) {
+    async deleteDeviceInList ({ getters, commit }, deviceToDeleteId) {
       let devicesEntryList = getters.devicesEntryList
       const deviceListId = getters.deviceListId
       const newDeviceList = devicesEntryList.filter(deviceEntry => deviceEntry.item.reference.split('/')[1] !== deviceToDeleteId)
@@ -160,7 +163,7 @@ export default new Vuex.Store({
         source: 'Practitioner/1984415',
         entry: newDeviceList
       }
-      fhirApi({
+      await fhirApi({
         method: 'put',
         url: '/List/' + deviceListId,
         headers: { 'Content-Type': 'application/fhir+json' },
@@ -171,12 +174,14 @@ export default new Vuex.Store({
     async deleteDevice ({ commit, getters }, deviceToDeleteId) {
       let devices = getters.devices
       let devicesIdList = getters.devicesIdList
-      this.dispatch('deleteDeviceToList', deviceToDeleteId)
+      await this.dispatch('deleteDeviceInList', deviceToDeleteId)
       await fhirApi.delete('Device/' + deviceToDeleteId)
       commit('setDevices', devices.filter(device => device.id !== deviceToDeleteId))
       commit('setDevicesIdList', devicesIdList.filter(deviceId => deviceId !== deviceToDeleteId))
     },
-    async editDevice ({ commit }, display, code, version, expirationDate, status, id) {
+    async editDevice ({ commit, getters }, display, code, version, expirationDate, status, id) {
+      let devicesEntryList = getters.devicesEntryList
+      const newDeviceList = devicesEntryList.filter(deviceEntry => deviceEntry.item.reference.split('/')[1] !== id)
       const updatedDevice = {
         resourceType: 'Device',
         id: id,
@@ -190,13 +195,14 @@ export default new Vuex.Store({
         expirationDate: expirationDate,
         version: version
       }
-      let response = await fhirApi({
+      newDeviceList.push(updatedDevice)
+      await fhirApi({
         method: 'put',
         url: '/Device/' + id,
         headers: { 'Content-Type': 'application/fhir+json' },
-        data: toSend
+        data: updatedDevice
       })
-      commit('addNewDeviceToList', toSend)
+      commit('setDevices', updatedDevice)
     }
   }
 })

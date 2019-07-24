@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="dialog">
-    <v-btn flat slot="activator" class="info"><v-icon dark @click.prevent="editDevice">create</v-icon></v-btn>
+    <v-btn flat slot="activator" class="info"><v-icon dark>create</v-icon></v-btn>
     <v-card>
       <v-card-title>
         <h2>Edit device</h2>
@@ -8,20 +8,20 @@
 
       <v-card-text>
         <v-form class="px-3" ref="deviceForm">
-          <v-text-field label="Name of the device" v-model="display" :rules="inputRules"></v-text-field>
+          <v-text-field label="Name of the device" v-model="device.display" :rules="inputRules"></v-text-field>
           <v-select
           :items="allDeviceTypes"
           item-value="value"
           item-text="text"
           label="Device type"
-          v-model="code"
+          v-model="device.code"
           ></v-select>
-          <v-text-field label="Version of the device" v-model="version" :rules="inputRules"></v-text-field>
+          <v-text-field label="Version of the device" v-model="device.version" :rules="inputRules"></v-text-field>
           <v-flex xs12 sm6 md4>
             <v-dialog
               ref="dialog"
               v-model="modal"
-              :return-value.sync="expirationDate"
+              :return-value.sync="device.expirationDate"
               persistent
               lazy
               full-width
@@ -29,21 +29,21 @@
             >
               <template v-slot:activator="{ on }">
                 <v-text-field
-                  v-model="expirationDate"
+                  v-model="device.expirationDate"
                   label="Expiration date"
                   prepend-icon="event"
                   readonly
                   v-on="on"
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="expirationDate" scrollable>
+              <v-date-picker v-model="device.expirationDate" scrollable>
                 <v-spacer></v-spacer>
                 <v-btn flat color="primary" @click="modal = false">Cancel</v-btn>
-                <v-btn flat color="primary" @click="$refs.dialog.save(expirationDate)">OK</v-btn>
+                <v-btn flat color="primary" @click="$refs.dialog.save(device.expirationDate)">OK</v-btn>
               </v-date-picker>
             </v-dialog>
           </v-flex>
-          <v-switch v-model="status" label="Device active"></v-switch>
+          <v-switch v-model="device.status" label="Device active"></v-switch>
 
           <v-spacer></v-spacer>
 
@@ -63,19 +63,34 @@ export default {
       modal: false,
       dialog: false,
       inputRules: [v => !!v || 'The input is required'],
-      buttonLoading: false
+      buttonLoading: false,
+      device: {
+        display: '',
+        deviceType: '',
+        version: 0,
+        status: true,
+        expirationDate: new Date().toISOString().substr(0, 10)
+      }
     }
   },
-  props: ['display', 'code', 'version', 'expirationDate', 'status', 'id'],
+  props: ['id'],
   methods: {
     async edit () {
       if (this.$refs.deviceForm.validate()) {
         this.buttonLoading = true
-        await this.$store.dispatch('editDevice', this.display, this.code, this.version, this.expirationDate, this.status, this.id)
+        // await this.$store.dispatch('editDevice', this.device)
         this.buttonLoading = false
         this.dialog = false
       }
     }
+  },
+  async created () {
+      this.device = await this.$store.dispatch('deviceById', this.id)
+      if (this.dialog) {
+        this.device.display = this.device.type.coding[0].display
+        this.device.code = this.device.type.coding[0].code
+        this.device.status = this.device.status == 'active'
+      }
   },
   computed: {
     ...mapGetters([

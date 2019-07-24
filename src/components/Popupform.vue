@@ -62,10 +62,10 @@ export default {
     return {
       modal: false,
       dialog: false,
-      inputRules: [v => !!v || "The input is required"],
+      inputRules: [v => !!v || 'The input is required'],
       buttonLoading: false,
-      device : {
-        display : '',
+      device: {
+        display: '',
         deviceType: '',
         version: 0,
         status: true,
@@ -76,10 +76,10 @@ export default {
   methods: {
     async submit () {
       if (this.$refs.deviceForm.validate()) {
-        this.buttonLoading = true;
-        await this.$store.dispatch('addDevice', this.device);
-        this.buttonLoading = false;
-        this.dialog = false;
+        this.buttonLoading = true
+        await this.$store.dispatch('addDevice', this.device)
+        this.buttonLoading = false
+        this.dialog = false
         // this.$emit('projectAdded')
       }
     }
@@ -89,7 +89,7 @@ export default {
       'allDeviceTypes'
     ]),
     formattedDate () {
-      return this.due;
+      return this.due
     }
   }
 }

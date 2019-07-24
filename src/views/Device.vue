@@ -35,31 +35,6 @@
     v-bind:status="device.status"
     v-bind:id="device.id"/>
 
-    <!-- <v-card flat v-for="device in devices" :key="device.id">
-      <v-layout row wrap class="pa-3 project ">
-        <v-flex xs6 md2>
-          <div>{{ device.type.coding[0].display }}</div>
-        </v-flex>
-        <v-flex xs6 sm4 md2>
-          <div>{{ device.type.coding[0].code }}</div>
-        </v-flex>
-          <v-flex xs6 sm4 md2>
-          <div>{{ device.version }}</div>
-        </v-flex>
-        <v-flex xs6 sm4 md2>
-          <div>{{ device.expirationDate }}</div>
-        </v-flex>
-        <v-flex xs6 sm4 md2>
-          <div>
-            <v-chip small class="white--text my-2 caption success">{{ device.status }}</v-chip>
-          </div>
-        </v-flex>
-        <v-flex xs6 sm4 md2>
-          <div></div>
-        </v-flex>
-      </v-layout>
-      <v-divider></v-divider>
-    </v-card> -->
   </div>
 </template>
 

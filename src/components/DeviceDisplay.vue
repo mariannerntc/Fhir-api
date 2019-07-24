@@ -1,6 +1,5 @@
 <template>
     <v-card flat>
-        {{ id }}
       <v-layout row wrap class="pa-3 project ">
         <v-flex xs6 md2>
           <div>{{ display }}</div>
@@ -16,12 +15,12 @@
         </v-flex>
         <v-flex xs6 sm4 md2>
           <div>
-            <v-chip small class="white--text my-2 caption success">{{ status }}</v-chip>
+            <v-chip small :class="`white--text my-2 caption ${status}`">{{ status }}</v-chip>
           </div>
         </v-flex>
         <v-flex xs6 sm4 md2>
           <div>
-            <EditDevice :id="id" :display="display" :code="code" :version="version" :expirationDate="expirationDate" :status="status" />
+            <EditDevice :id="id" />
             <v-btn color="error"><v-icon dark @click.prevent="deleteDevice">delete</v-icon></v-btn>
           </div>
         </v-flex>
@@ -43,3 +42,15 @@ export default {
   }
 }
 </script>
+
+<style>
+.active {
+  background-color: #4caf50 !important;
+  border-color: #4caf50;
+}
+
+.inactive {
+  background-color: #fb8c00 !important;
+  border-color: #fb8c00;
+}
+</style>
