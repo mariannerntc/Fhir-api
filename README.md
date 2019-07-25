@@ -22,3 +22,8 @@ There is a few tests, to run them do :
 npm run test
 ```
 
+## 4 Compiles and minifies for production
+If you want to build the app for production, run :
+```
+npm run build
+```

@@ -2,13 +2,10 @@
   <div class="practitioner">
     <h1>My informations</h1>
     <div>
-      <v-avatar size="300">
+      <v-avatar size="200">
         <img src="/avatar-5.png" margin-left="200%">
       </v-avatar>
-    </div>
-    
-
-    <v-card flat>
+      <v-card flat>
       <v-layout row wrap class="pa-3">
         <v-flex xs12 md2>
           <div class="display-1">Name</div>
@@ -46,6 +43,9 @@
       </v-layout>
       <v-divider></v-divider>
     </v-card>
+    </div>
+
+    
   </div>
 </template>
 
